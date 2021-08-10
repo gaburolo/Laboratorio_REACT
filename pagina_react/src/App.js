@@ -4,7 +4,6 @@ import React from 'react';
 
 import { StartInformation } from './components/StartInformation';
 import { ParkingClient } from './clients/ParkingClient';
-import logo from './logo.svg';
 import {SpacesInformation} from './components/SpacesInformation';
 
 export class App extends React.Component {
