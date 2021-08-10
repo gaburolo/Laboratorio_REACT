@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 import SpacesInformation from './components/SpacesInformation'
-import { ParkingClient } from './clients/ParkingClient';
 import GetData from './clients/GetData';
+import PostData from './clients/PostData';
 import AddSpaceForm from './components/AddSpaceForm';
 
   /* parkingClient = new ParkingClient();
@@ -35,17 +35,19 @@ function App() {
   const [spaces, setSpaces] = useState([]);
 
   //Get Initial Data
-  const initialState = GetData("http://localhost/api/spaces", spaces, setSpaces);
+  GetData("http://localhost/api/spaces", spaces, setSpaces);
 
   //Add New Space
   const addSpace = (description) => {
-    console.log(description)
+    PostData(description)
   }
-  
+
   return (
     <div className="App">
-      <div className='container'>
+      <header>
         <h1>Taller React</h1>
+      </header>
+      <div className='container'>
         <div className='flex-row'>
           <div className='flex-large'>
             <h2>Availables</h2>

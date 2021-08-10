@@ -3,7 +3,7 @@ import React from "react";
 const SpacesInformation = (props) => {
     return (
         <table>
-        <thead>
+        <thead id='table-name'>
             <tr>
                 <td>ID</td>
                 <td>STATE</td>
@@ -12,7 +12,9 @@ const SpacesInformation = (props) => {
                 <td>LICENSE PLATE</td>
                 <td>CHECK IN TIME</td>
                 <td>RESERVED</td>
-                <td>ACTION</td>
+                {props.reserved && 
+                    <td>ACTION</td>
+                }
             </tr>
         </thead>
         <tbody>
@@ -29,10 +31,11 @@ const SpacesInformation = (props) => {
                     <td>{space.placa}</td>
                     <td>{space.horaIngreso}</td>
                     <td>{space.reservado.toString()}</td>
-                    <td>
-                        <button className='button muted-button'>Edit</button>
-                        <button className='button muted-button'>Delete</button>
-                    </td>
+                    {props.reserved &&
+                        <td>
+                            <button className='button muted-button'>Break Free</button>
+                        </td>
+                    } 
                 </tr>    
                 )) : (
                     <tr>
