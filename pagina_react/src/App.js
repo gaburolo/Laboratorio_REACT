@@ -1,17 +1,20 @@
 import './App.css';
 
 import React from 'react';
-import { StarWarsCharacters } from './components/StarWarsCharacters';
-import { StarWarsClient } from './clients/StarWarsClient';
+
+import { StartInformation } from './components/StartInformation';
+import { ParkingClient } from './clients/ParkingClient';
 import logo from './logo.svg';
+import {SpacesInformation} from './components/SpacesInformation';
 
 export class App extends React.Component {
-  starWarsClient = new StarWarsClient();
+  parkingClient = new ParkingClient();
 
   constructor()  {
     super();
     this.state = {
-      data: []
+      data: [],
+      startdata:[]
     }
   }
   
@@ -20,9 +23,11 @@ export class App extends React.Component {
   }
 
   async loadData() {
-    const newData = await this.starWarsClient.getStarWarsData();
+    const newData = await this.parkingClient.getSpacesData();
+    const newstartData = await this.parkingClient.getStarWarsData();
     this.setState({
-      data: newData
+      data: newData,
+      startdata:newstartData
     });
   }
 
@@ -30,7 +35,8 @@ export class App extends React.Component {
     return (
       <div className="App">
        
-        <StarWarsCharacters characters={this.state.data}></StarWarsCharacters>
+       <SpacesInformation spaces={this.state.data}></SpacesInformation>
+       <StartInformation characters={this.state.startdata}></StartInformation>
       </div>
     );
   }
