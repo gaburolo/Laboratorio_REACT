@@ -5,6 +5,7 @@ export class ParkingClient {
         console.log(parsedResponse)
         return parsedResponse;
     }
+    
     async getStarWarsData() {
         const rawResponse = await fetch("https://swapi.dev/api/people");
         const parsedResponse = await rawResponse.json();

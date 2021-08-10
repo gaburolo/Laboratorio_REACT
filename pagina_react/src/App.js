@@ -1,13 +1,11 @@
-import './App.css';
+import React, { useState, useEffect } from 'react';
 
-import React from 'react';
-
-import { StartInformation } from './components/StartInformation';
+import SpacesInformation from './components/SpacesInformation'
 import { ParkingClient } from './clients/ParkingClient';
-import {SpacesInformation} from './components/SpacesInformation';
+import GetData from './clients/GetData';
+import AddSpaceForm from './components/AddSpaceForm';
 
-export class App extends React.Component {
-  parkingClient = new ParkingClient();
+  /* parkingClient = new ParkingClient();
 
   constructor()  {
     super();
@@ -28,16 +26,51 @@ export class App extends React.Component {
       data: newData,
       startdata:newstartData
     });
-  }
 
-  render() {
-    return (
-      <div className="App">
-       
-       <SpacesInformation spaces={this.state.data}></SpacesInformation>
-       <StartInformation characters={this.state.startdata}></StartInformation>
-      </div>
-    );
+    <StartInformation characters={this.state.startdata}></StartInformation>
+  } */
+
+function App() {
+
+  const [spaces, setSpaces] = useState([]);
+
+  //Get Initial Data
+  const initialState = GetData("http://localhost/api/spaces", spaces, setSpaces);
+
+  //Add New Space
+  const addSpace = (description) => {
+    console.log(description)
   }
+  
+  return (
+    <div className="App">
+      <div className='container'>
+        <h1>Taller React</h1>
+        <div className='flex-row'>
+          <div className='flex-large'>
+            <h2>Availables</h2>
+
+            <SpacesInformation spaces={spaces} reserved={false}/>
+
+          </div>
+          <div className='flex-large'>
+            <h2>Añadir parqueo</h2>
+
+            <AddSpaceForm addSpace={addSpace}/>
+
+          </div>
+        </div>
+        <div className='flex-row'>
+          <div className='flex-large'>
+            <h2>Reserved</h2>
+
+            <SpacesInformation spaces={spaces} reserved={true}/>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
+export default App;
 
