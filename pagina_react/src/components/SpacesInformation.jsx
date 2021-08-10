@@ -7,19 +7,28 @@ export class SpacesInformation extends React.Component {
         };
 
         async function addParqueo() {
-            const detalle=document.getElementById("detalle").value;
-            const rawResponse = await fetch("https://localhost/api/spaces", {
-              method: 'POST',
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({"detalle":detalle})
-            });
-            const content = await rawResponse.json();
-          
-            console.log(content);
-          };
+                const detalle=document.getElementById("detalle").value;
+                
+                const requestOption={
+                    method: "post",
+                    mode:'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin':'*',
+                    },
+                    body: JSON.stringify({"detalle":detalle})};
+               await fetch('http://localhost:80/api/spaces/', requestOption)
+                .then(response => response.json());
+                console.log(requestOption);
+
+                
+            };
+
+
+
+            
+            
 
         return (<section>
             <table>

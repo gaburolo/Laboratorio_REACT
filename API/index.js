@@ -14,6 +14,12 @@ const espacios =[
     {id:4, state: 'free', detalle:"Normal",vehiculo: false, placa:"", horaIngreso:"",reservado:false},
 ];
 
+// Add headers before the routes are defined
+app.all('/', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next()
+  });
 
 app.get('/',(req,res)=>{
     res.send('Node JS api');
@@ -32,7 +38,8 @@ app.get('/api/spaces/:id',(req,res)=>{
 });
 
 //POST SPACES
-app.post('/api/spaces',(req,res)=>{
+app.post('/api/spaces',function(req,res){
+    console.log(req.body);
     const espacio={
         id:espacios[espacios.length-1].id+1,
         state:'free',
