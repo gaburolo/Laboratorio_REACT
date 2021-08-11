@@ -8,11 +8,14 @@ const AddSpaceForm = (props) => {
   }
 
   return (
-    <form>
+    <div className='addForm'>
+      <form>
       <label htmlFor="description">Description</label>
       <input type='text' name='description' id='description'/>
       <button onClick={onClick} type='button'>Add new Space</button>
     </form>
+    </div>
+    
   )
 }
 

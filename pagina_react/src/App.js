@@ -42,6 +42,13 @@ function App() {
     PostData(description)
   }
 
+  const setReserved = (space, value) => {
+    const newSpace = {
+      id: space.id, state: space.state, detalle: space.detalle, vehiculo: space.vehiculo, placa: space.placa, horaIngreso: space.horaIngreso, reservado: value
+    }
+    setSpaces(spaces.map((space) => (space.id === newSpace.id ? newSpace : space)))
+  }
+
   return (
     <div className="App">
       <header>
@@ -52,10 +59,10 @@ function App() {
           <div className='flex-large'>
             <h2>Availables</h2>
 
-            <SpacesInformation spaces={spaces} reserved={false}/>
+            <SpacesInformation spaces={spaces} reserved={false} setReserved={setReserved}/>
 
           </div>
-          <div className='flex-large'>
+          <div className='flex-add'>
             <h2>Añadir parqueo</h2>
 
             <AddSpaceForm addSpace={addSpace}/>
@@ -66,7 +73,7 @@ function App() {
           <div className='flex-large'>
             <h2>Reserved</h2>
 
-            <SpacesInformation spaces={spaces} reserved={true}/>
+            <SpacesInformation spaces={spaces} reserved={true} setReserved={setReserved}/>
 
           </div>
         </div>

@@ -12,9 +12,7 @@ const SpacesInformation = (props) => {
                 <td>LICENSE PLATE</td>
                 <td>CHECK IN TIME</td>
                 <td>RESERVED</td>
-                {props.reserved && 
-                    <td>ACTION</td>
-                }
+                <td>ACTION</td>
             </tr>
         </thead>
         <tbody>
@@ -31,10 +29,21 @@ const SpacesInformation = (props) => {
                     <td>{space.placa}</td>
                     <td>{space.horaIngreso}</td>
                     <td>{space.reservado.toString()}</td>
-                    {props.reserved &&
-                        <td>
-                            <button className='button muted-button'>Break Free</button>
-                        </td>
+                    {props.reserved === false ?
+                        (<td>
+                            <button 
+                                className='button muted-button'
+                                onClick={() => {props.setReserved(space, true)}}
+                                >Reserve
+                            </button>
+                        </td>) :
+                        (<td>
+                            <button 
+                                className='button muted-button'
+                                onClick={() => {props.setReserved(space, false)}}
+                                >Break Free
+                            </button>
+                        </td>)
                     } 
                 </tr>    
                 )) : (
