@@ -1,132 +1,165 @@
-const express= require('express')
-const cors=require('cors')
+const express = require('express');
+const { config } = require('./config');
+const { getCurrentTime } = require('./util')
+const cors = require('cors');
+
 const app=express();
-
-
 app.use(express.json());
-app.use(cors());
+app.use(cors(config.cors));
 
 
-const espacios =[
-    {id:1, state: 'in-use', detalle:"Discapacitados", vehiculo: true, placa:"8496321", horaIngreso:"14:57",reservado:false},
-    {id:2, state: 'in-use', detalle:"Normal",vehiculo: true, placa:"2696329", horaIngreso:"14:57",reservado:true},
-    {id:3, state: 'in-use', detalle:"Normal",vehiculo: true, placa:"8652855", horaIngreso:"14:57",reservado:false},
-    {id:4, state: 'free', detalle:"Normal",vehiculo: false, placa:"", horaIngreso:"",reservado:false},
+let spaces = [
+    {id:1, state: 'in-use', detail:"handicapped-parking", licensePlate: "8496321", checkIn:"14:57",reserved:true},
+    {id:2, state: 'in-use', detail:"indoor-parking"     , licensePlate: "2696329", checkIn:"14:57",reserved:true},
+    {id:3, state: 'in-use', detail:"indoor-parking"     , licensePlate: "8652855", checkIn:"14:57",reserved:true},
+    {id:4, state: 'free'  , detail:"indoor-parking"     , licensePlate: ""       , checkIn:""     ,reserved:false},
 ];
 
 // Add headers before the routes are defined
 app.all('/', function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", config.cors.origin);
+    res.header('Access-Control-Allow-Methods', 'POST,GET,PUT,DELETE');
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next()
-  });
+});
 
+
+// Server landing
 app.get('/',(req,res)=>{
     res.send('Node JS api');
 });
 
-//GET SPACES
+
+// [GET] /api/spaces
 app.get('/api/spaces',(req,res)=>{
-    res.send(espacios);
+    res.status(200).send(spaces);
 });
 
-//GET SPACES/{id}
+
+// [GET] /api/spaces/{id}
 app.get('/api/spaces/:id',(req,res)=>{
-    const espacio=espacios.find(c => c.id===parseInt(req.params.id) );
-    if(!espacio) return res.status(405).send('Espacio no encotrado');
-    res.send(espacio);
+    const id = parseInt(req.params.id);
+    const space = spaces.find(c => c.id === id);
+    if(!space) {
+        res.status(404).json({
+            status: 'failed',
+            error: `Space with id: ${id} not found`
+        }).end();
+    }
+    res.status(200).json(space);
 });
 
-//POST SPACES
-app.post('/api/spaces',function(req,res){
-    console.log(req.body);
-    const espacio={
-        id:espacios[espacios.length-1].id+1,
+
+// [POST] /api/spaces
+app.post('/api/spaces', (req,res) => {
+    const newSpace = {
+        id:spaces[spaces.length-1].id+1,
         state:'free',
-        detalle:req.body.detalle,
-        vehiculo:false,
-        placa:"",
-        horaIngreso:"",
-        reservado:false,
+        detail:req.body.detail,
+        licensePlate: '',
+        checkIn: '',
+        reserved:false,
     }
-    espacios.push(espacio);
-    res.send(espacio);
+    spaces.push(newSpace);
+    res.status(201).json(newSpace);
 });
 
-//PUT SPACES/{id}
-app.put('/api/spaces/:id',(req,res)=>{
-    
-    const espacio=espacios.find(c => c.id===parseInt(req.params.id) );
-    if(!espacio) return res.status(405).send('Espacio no encotrado');
-    const index = espacios.indexOf(espacio);
-    const espacioModi={
-        id:espacios[index].id,
-        state:req.body.state,
-        detalle:req.body.detalle,
-        vehiculo:req.body.vehiculo,
-        placa:req.body.vehiculo,
-        horaIngreso: req.body.horaIngreso,
+
+// [PUT] /api/spaces/{id}
+app.put('/api/spaces/:id',(req,res) => {
+    const id = parseInt(req.params.id);
+    const modifiedSpace = req.body;
+    const space = spaces.find(c => c.id === id);
+    if(!space) {
+        res.status(404).json({
+            status: 'failed',
+            error: `Space with id: ${id} not found`
+        }).end();
     }
 
-    res.send(espacioModi);
+    space.detail = modifiedSpace.detail;
+
+    res.status(200).json(space);
 });
 
-//DELETE SPACES/{id}
-app.delete('/api/spaces/:id',(req,res)=>{
-    const espacio=espacios.find(c => c.id===parseInt(req.params.id) );
-    if(!espacio) return res.status(405).send('Espacio no encotrado');
-    const index = espacios.indexOf(espacio);
-    if(espacios[index].vehiculo !='') return res.status(405).send('Vehiculo en el espacio que desea eliminar');
-    espacios.splice(index,1);
-    res.send(espacio);
+
+// [DELETE] /api/spaces/{id}
+app.delete('/api/spaces/:id',(req,res) => {
+    const id = parseInt(req.params.id);
+    let space = spaces.find(c => c.id === id);
+    if(!space) {
+        res.status(404).json({
+            status: 'failed',
+            error: `Space with id: ${id} not found`
+        }).end();
+    }
+
+    if(space.reserved) {
+        res.status(403).json({
+            status: 'failed',
+            error: `Space cannot be deleted because it is occupied`
+        }).end();
+    }
+    spaces = spaces.filter( s => s.id !== space.id);
+    res.status(200).json(space);
 });
 
-//GET RESERVATIONS
-app.get('/api/reservations',(req,res)=>{
-    const espaciosUso =[];
-    for(let i=0; i<espacios.length;i++){
-        if(espacios[i].vehiculo !=''){
-            espaciosUso.push(espacios[i]);
+
+// [GET] /api/reservations
+app.get('/api/reservations',(req,res) => {
+    const inUseSpaces = [];
+    spaces.forEach( space => {
+        if(space.reserved) {
+            inUseSpaces.push(space);
         }
-    }
-    res.send(espaciosUso);
+    });
+    res.status(200).send(inUseSpaces);
 });
-//POST RESERVATIONS
+
+
+// [POST] /api/reservations
 app.post('/api/reservations',(req,res)=>{
-    for(let i=0; i<espacios.length;i++){
-        if(espacios[i].vehiculo == false){
-            espacios[i].state='In-use';
-            espacios[i].vehiculo=true;
-            espacios[i].placa=req.body.placa;
-            espacios[i].reservado=true;
-            espacios[i].horaIngreso=req.body.horaIngreso;
-            res.send(espacios[i]);
-            return 0;
+    const licensePlate = req.body.licensePlate;
+    let success = false;
+    spaces.forEach( space => {
+        if(!space.reserved) {
+            space.state = "in-use";
+            space.reserved = true;
+            space.licensePlate = licensePlate;
+            space.checkIn = getCurrentTime();
+            res.status(201).json(space).end();
+            success = true;
         }
+    });
+
+    if(!success){
+        res.status(202).json({
+            status: 'failed',
+            error: 'The reservation cannot be carried out. All spaces are occupied.'
+        }).end();
     }
-    return res.status(405).send('No hay espacios');
 });
 
-//DELETE RESERVATIONS/{id}
+// [DELETE] /api/reservations/{id}
 app.delete('/api/reservations/:id',(req,res)=>{
-    const espacio=espacios.find(c => c.id===parseInt(req.params.id) );
-    if(!espacio) return res.status(405).send('Espacio no encotrado');
-    const index = espacios.indexOf(espacio);
-    if(espacios[index].vehiculo == true){
-        espacios[index].state='Free';
-        espacios[index].vehiculo=false;
-        espacios[index].placa="";
-        espacios[index].reservado=false;
-        espacios[index].horaIngreso="";
-        res.send(espacios[index]);
-    }else{
-        return res.status(405).send('Espacio no esta reservado')
+    const id = parseInt(req.params.id);
+    let space = spaces.find(c => c.id === id);
+
+    if(!space || !space.reserved) {
+        res.status(404).json({
+            status: 'failed',
+            error: `Reservation of space with id: ${id} not found`
+        }).end();
     }
 
+    space.state = "free";
+    space.reserved = false;
+    space.licensePlate = '';
+    space.checkIn = '';
+    
+    res.status(200).json(space);
 });
 
 
-
-
-const port=process.env.port || 80;
-app.listen(port,()=>console.log(`Escuchando en el pueto ${port}...`));
+const port = config.port;
+app.listen(port,() => console.log(`Listening on port: ${port}...`));
