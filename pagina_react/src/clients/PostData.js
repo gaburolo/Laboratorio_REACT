@@ -7,11 +7,10 @@ const PostData = (description) => {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
         },
-        body: JSON.stringify({ "detalle": description })
+        body: JSON.stringify({ "detail": description })
     };
-    fetch('http://localhost:80/api/spaces/', requestOption)
+    fetch('http://localhost:8080/api/spaces/', requestOption)
     .then(response => response.json());
-    console.log(requestOption);
 };
 
 export default PostData;

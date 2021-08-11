@@ -5,7 +5,7 @@ const cors = require('cors');
 
 const app=express();
 app.use(express.json());
-app.use(cors(config.cors));
+app.use(cors());
 
 
 let spaces = [
@@ -17,8 +17,8 @@ let spaces = [
 
 // Add headers before the routes are defined
 app.all('/', function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", config.cors.origin);
-    res.header('Access-Control-Allow-Methods', 'POST,GET,PUT,DELETE');
+    res.header("Access-Control-Allow-Origin", '*');
+    //res.header('Access-Control-Allow-Methods', 'POST,GET,PUT,DELETE');
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next()
 });
@@ -122,7 +122,7 @@ app.post('/api/reservations',(req,res)=>{
     const licensePlate = req.body.licensePlate;
     let success = false;
     spaces.forEach( space => {
-        if(!space.reserved) {
+        if(!space.reserved && !success) {
             space.state = "in-use";
             space.reserved = true;
             space.licensePlate = licensePlate;

@@ -11,7 +11,7 @@ function App() {
   const [spaces, setSpaces] = useState([]);
 
   //Get Initial Data
-  const initalState = GetData("http://localhost/api/spaces").then((data) => setSpaces(data));
+  const initalState = GetData("http://localhost:8080/api/spaces").then((data) => setSpaces(data));
 
   //Add New Space
   const addSpace = (description) => {

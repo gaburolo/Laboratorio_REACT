@@ -8,8 +8,8 @@ const SpacesInformation = (props) => {
                 <td>ID</td>
                 <td>STATE</td>
                 <td>DETAIL</td>
-                <td>LICENSE PLATE</td>
-                <td>CHECK IN TIME</td>
+                {props.reserved && (<td>LICENSE PLATE</td>)}
+                {props.reserved && (<td>CHECK IN TIME</td>)}
                 <td>RESERVED</td>
             </tr>
         </thead>
@@ -18,15 +18,16 @@ const SpacesInformation = (props) => {
             {
                 props.spaces.length > 0 ?
                 props.spaces.filter((space) => {
-                    return space.reservado === props.reserved
+                    return space.reserved === props.reserved
                 }).map((space) => (
                 <tr key={space.id}>
                     <td>{space.id}</td>
                     <td>{space.state}</td>
-                    <td>{space.detalle}</td>
-                    <td>{space.placa}</td>
-                    <td>{space.horaIngreso}</td>
-                    <td>{space.reservado.toString()}</td> 
+                    <td>{space.detail}</td>
+                    {props.reserved && (<td>{space.licensePlate}</td>)}
+                    {props.reserved && (<td>{space.checkIn}</td>)}
+                    
+                    <td>{space.reserved.toString()}</td> 
                 </tr>    
                 )) : (
                     <tr>

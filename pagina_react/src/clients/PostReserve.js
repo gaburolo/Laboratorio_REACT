@@ -8,10 +8,9 @@ const PostReserve = (licensePlate) => {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin':'*',
     },
-    body: JSON.stringify({"placa":licensePlate, "horaIngreso":"10:20"})};
-  fetch('http://localhost:80/api/reservations/', requestOption)
+    body: JSON.stringify({"licensePlate":licensePlate})};
+  fetch('http://localhost:8080/api/reservations/', requestOption)
   .then(response => response.json());
-  console.log(requestOption);
 }
 
 export default PostReserve;
