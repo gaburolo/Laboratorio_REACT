@@ -1,43 +1,57 @@
-import './App.css';
+import React, { useState } from 'react';
 
-import React from 'react';
+import SpacesInformation from './components/SpacesInformation'
+import GetData from './clients/GetData';
+import PostData from './clients/PostData';
+import AddSpaceForm from './components/AddSpaceForm';
+import PostReserve from './clients/PostReserve';
 
-import { StartInformation } from './components/StartInformation';
-import { ParkingClient } from './clients/ParkingClient';
-import {SpacesInformation} from './components/SpacesInformation';
+function App() {
 
-export class App extends React.Component {
-  parkingClient = new ParkingClient();
+  const [spaces, setSpaces] = useState([]);
 
-  constructor()  {
-    super();
-    this.state = {
-      data: [],
-      startdata:[]
-    }
-  }
-  
-  componentDidMount() {
-    this.loadData();
+  //Get Initial Data
+  const initalState = GetData("http://localhost/api/spaces").then((data) => setSpaces(data));
+
+  //Add New Space
+  const addSpace = (description) => {
+    PostData(description)
   }
 
-  async loadData() {
-    const newData = await this.parkingClient.getSpacesData();
-    const newstartData = await this.parkingClient.getStarWarsData();
-    this.setState({
-      data: newData,
-      startdata:newstartData
-    });
+  const reservationSpace = (licensePlate) => {
+    PostReserve(licensePlate)
   }
 
-  render() {
-    return (
-      <div className="App">
-       
-       <SpacesInformation spaces={this.state.data}></SpacesInformation>
-       <StartInformation characters={this.state.startdata}></StartInformation>
+  return (
+    <div className="App">
+      <header>
+        <h1>Taller React</h1>
+      </header>
+      <div className='container'>
+        <div className='flex-row'>
+          <div className='flex-large'>
+            <h2>Availables</h2>
+
+            <SpacesInformation spaces={spaces} reserved={false} />
+
+          </div>
+          <div className='flex-add'>
+            
+            <AddSpaceForm addSpace={addSpace} reservationSpace={reservationSpace}/>
+
+          </div>
+        </div>
+        <div className='flex-row'>
+          <div className='flex-large'>
+            <h2>Reserved</h2>
+
+            <SpacesInformation spaces={spaces} reserved={true} />
+
+          </div>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
+export default App;
