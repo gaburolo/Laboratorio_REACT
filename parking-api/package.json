@@ -1,14 +1,14 @@
 {
-  "name": "api_prueba",
+  "name": "parking-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Parking-TEC System",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "DEBUG=app:* nodemon index",
     "start": "NODE_ENV=production node index"
   },
-  "author": "",
+  "author": "@gaborolo @estalvgs",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
