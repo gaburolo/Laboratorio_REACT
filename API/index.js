@@ -18,7 +18,7 @@ let spaces = [
 // Add headers before the routes are defined
 app.all('/', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", '*');
-    //res.header('Access-Control-Allow-Methods', 'POST,GET,PUT,DELETE');
+    res.header('Access-Control-Allow-Methods', 'POST,GET,PUT,DELETE');
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next()
 });
@@ -45,8 +45,9 @@ app.get('/api/spaces/:id',(req,res)=>{
             status: 'failed',
             error: `Space with id: ${id} not found`
         }).end();
+    } else {
+        res.status(200).json(space);
     }
-    res.status(200).json(space);
 });
 
 
@@ -75,11 +76,10 @@ app.put('/api/spaces/:id',(req,res) => {
             status: 'failed',
             error: `Space with id: ${id} not found`
         }).end();
+    } else {
+        space.detail = modifiedSpace.detail;
+        res.status(200).json(space);
     }
-
-    space.detail = modifiedSpace.detail;
-
-    res.status(200).json(space);
 });
 
 
@@ -94,14 +94,15 @@ app.delete('/api/spaces/:id',(req,res) => {
         }).end();
     }
 
-    if(space.reserved) {
+    else if(space.reserved) {
         res.status(403).json({
             status: 'failed',
             error: `Space cannot be deleted because it is occupied`
         }).end();
+    } else {
+        spaces = spaces.filter( s => s.id !== space.id);
+        res.status(200).json(space).end();
     }
-    spaces = spaces.filter( s => s.id !== space.id);
-    res.status(200).json(space);
 });
 
 
@@ -150,14 +151,14 @@ app.delete('/api/reservations/:id',(req,res)=>{
             status: 'failed',
             error: `Reservation of space with id: ${id} not found`
         }).end();
+    } else {
+        space.state = "free";
+        space.reserved = false;
+        space.licensePlate = '';
+        space.checkIn = '';
+        
+        res.status(200).json(space);
     }
-
-    space.state = "free";
-    space.reserved = false;
-    space.licensePlate = '';
-    space.checkIn = '';
-    
-    res.status(200).json(space);
 });
 
 
