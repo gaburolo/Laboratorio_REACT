@@ -1,52 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import SpacesInformation from './components/SpacesInformation'
 import GetData from './clients/GetData';
 import PostData from './clients/PostData';
 import AddSpaceForm from './components/AddSpaceForm';
-
-  /* parkingClient = new ParkingClient();
-
-  constructor()  {
-    super();
-    this.state = {
-      data: [],
-      startdata:[]
-    }
-  }
-  
-  componentDidMount() {
-    this.loadData();
-  }
-
-  async loadData() {
-    const newData = await this.parkingClient.getSpacesData();
-    const newstartData = await this.parkingClient.getStarWarsData();
-    this.setState({
-      data: newData,
-      startdata:newstartData
-    });
-
-    <StartInformation characters={this.state.startdata}></StartInformation>
-  } */
+import PostReserve from './clients/PostReserve';
 
 function App() {
 
   const [spaces, setSpaces] = useState([]);
 
   //Get Initial Data
-  GetData("http://localhost/api/spaces", spaces, setSpaces);
+  const initalState = GetData("http://localhost/api/spaces").then((data) => setSpaces(data));
 
   //Add New Space
   const addSpace = (description) => {
     PostData(description)
   }
 
-  const setReserved = (space, value) => {
-    const newSpace = {
-      id: space.id, state: space.state, detalle: space.detalle, vehiculo: space.vehiculo, placa: space.placa, horaIngreso: space.horaIngreso, reservado: value
-    }
-    setSpaces(spaces.map((space) => (space.id === newSpace.id ? newSpace : space)))
+  const reservationSpace = (licensePlate) => {
+    PostReserve(licensePlate)
   }
 
   return (
@@ -59,13 +32,12 @@ function App() {
           <div className='flex-large'>
             <h2>Availables</h2>
 
-            <SpacesInformation spaces={spaces} reserved={false} setReserved={setReserved}/>
+            <SpacesInformation spaces={spaces} reserved={false} />
 
           </div>
           <div className='flex-add'>
-            <h2>Añadir parqueo</h2>
-
-            <AddSpaceForm addSpace={addSpace}/>
+            
+            <AddSpaceForm addSpace={addSpace} reservationSpace={reservationSpace}/>
 
           </div>
         </div>
@@ -73,7 +45,7 @@ function App() {
           <div className='flex-large'>
             <h2>Reserved</h2>
 
-            <SpacesInformation spaces={spaces} reserved={true} setReserved={setReserved}/>
+            <SpacesInformation spaces={spaces} reserved={true} />
 
           </div>
         </div>
@@ -81,5 +53,5 @@ function App() {
     </div>
   );
 }
-export default App;
 
+export default App;
