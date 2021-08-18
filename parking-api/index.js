@@ -171,5 +171,7 @@ app.delete('/api/reservations/:id',(req,res)=>{
 });
 
 const sslServer = https.createServer(config.ssl, app);
-const port = config.port;
-sslServer.listen(port,() => console.log(`Secure server 🚀🔑 on port: ${port}... `));
+const httpPort = config.httpPort;
+const httpsPort = config.httpsPort;
+app.listen(httpPort,() => console.log(`Server running 🚀 on port: ${httpPort}... `));
+sslServer.listen(httpsPort,() => console.log(`Secure server 🚀🔑 on port: ${httpsPort}... `));

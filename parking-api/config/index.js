@@ -6,7 +6,8 @@ const homePath = ''
 
 const config = {
   dev: process.env.NODE_ENV !== 'production',
-  port: process.env.PORT || 8080,
+  httpPort: process.env.PORT || 8000,
+  httpsPort: 8080,
   cors: {
     origin: 'http://localhost:3000',
     methods: ['GET','POST','PUT','DELETE'],
