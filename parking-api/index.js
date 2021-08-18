@@ -1,4 +1,5 @@
 const express = require('express');
+const https = require('https');
 const { config } = require('./config');
 const { getCurrentTime, filterData } = require('./util')
 const cors = require('cors');
@@ -169,6 +170,6 @@ app.delete('/api/reservations/:id',(req,res)=>{
     return res.status(200).json(space);
 });
 
-
+const sslServer = https.createServer(config.ssl, app);
 const port = config.port;
-app.listen(port,() => console.log(`Listening on port: ${port}...`));
+sslServer.listen(port,() => console.log(`Secure server 🚀🔑 on port: ${port}... `));
