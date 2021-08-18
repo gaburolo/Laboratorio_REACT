@@ -1,4 +1,8 @@
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+
+const homePath = ''
 
 const config = {
   dev: process.env.NODE_ENV !== 'production',
@@ -8,6 +12,10 @@ const config = {
     methods: ['GET','POST','PUT','DELETE'],
     optionsSuccessStatus: 204,
     credentials: true,
+  },
+  ssl: {
+    key: fs.readFileSync(path.resolve(__dirname,'../cert/key.pem')),
+    cert:fs.readFileSync(path.resolve(__dirname,'../cert/cert.pem'))
   }
 };
 
