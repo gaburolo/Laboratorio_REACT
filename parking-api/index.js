@@ -3,7 +3,7 @@ const https = require('https')
 const cors = require('cors')
 
 const { config } = require('./config')
-const { getCurrentTime, filterData } = require('./util')
+const { getCurrentTime, filterData, pagination } = require('./util')
 let { spaces } = require('./db')
 
 const app = express();
@@ -39,12 +39,16 @@ app.get('/api/spaces',(req,res)=>{
         _spaces = _spaces.filter(s => s.state === 'in-use');
     }
 
+    
+    _spaces = pagination(_spaces,req);
+
     // Apply filter for object properties
     let filter = req.query.filter;
     if(filter) {
         filter = filter.split(',');
         _spaces = filterData(filter,_spaces);
     }
+    
 
     return res.status(200).send(_spaces);
 });
@@ -127,6 +131,9 @@ app.get('/api/reservations',(req,res) => {
             inUseSpaces.push(space);
         }
     });
+
+
+    inUseSpaces = pagination(inUseSpaces,req);
 
     // Apply filter for object properties
     let filter = req.query.filter;
