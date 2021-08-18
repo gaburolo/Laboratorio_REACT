@@ -2,18 +2,12 @@ const express = require('express');
 const { config } = require('./config');
 const { getCurrentTime } = require('./util')
 const cors = require('cors');
+let { spaces } = require('./db');
 
 const app=express();
 app.use(express.json());
 app.use(cors());
 
-
-let spaces = [
-    {id:1, state: 'in-use', detail:"handicapped-parking", licensePlate: "8496321", checkIn:"14:57",reserved:true},
-    {id:2, state: 'in-use', detail:"indoor-parking"     , licensePlate: "2696329", checkIn:"14:57",reserved:true},
-    {id:3, state: 'in-use', detail:"indoor-parking"     , licensePlate: "8652855", checkIn:"14:57",reserved:true},
-    {id:4, state: 'free'  , detail:"indoor-parking"     , licensePlate: ""       , checkIn:""     ,reserved:false},
-];
 
 // Add headers before the routes are defined
 app.all('/', function(req, res, next) {
@@ -33,15 +27,25 @@ app.get('/',(req,res)=>{
 // [GET] /api/spaces
 app.get('/api/spaces',(req,res)=>{
     const state = req.query.state;
-    let _spaces = [... spaces];
-
-    console.log('state: ',req);
+    let _spaces = [...spaces];
 
     // filter by state
     if(state === 'free') {
         _spaces = _spaces.filter(s => s.state === 'free');
     } else if (state === 'in-use') {
         _spaces = _spaces.filter(s => s.state === 'in-use');
+    }
+
+    let filter = req.query.filter;
+    if(filter) {
+        filter = filter.split(',');
+        _spaces = _spaces.map( s => {
+            const newSpace = {};
+            for(const prop of filter) {
+                newSpace[prop] = s[prop];
+            }
+            return newSpace;
+        });
     }
 
     return res.status(200).send(_spaces);
@@ -133,7 +137,7 @@ app.get('/api/reservations',(req,res) => {
 app.post('/api/reservations',(req,res)=>{
     const licensePlate = req.body.licensePlate;
     
-    spaces.forEach( space => {
+    for(let space of spaces) {
         if(!space.reserved) {
             space.state = "in-use";
             space.reserved = true;
@@ -141,13 +145,14 @@ app.post('/api/reservations',(req,res)=>{
             space.checkIn = getCurrentTime();
             return res.status(201).json(space).end();
         }
-    });
+    }
 
     return res.status(202).json({
         status: 'failed',
         error: 'The reservation cannot be carried out. All spaces are occupied.'
-    }).end();
+    });
 });
+
 
 // [DELETE] /api/reservations/{id}
 app.delete('/api/reservations/:id',(req,res)=>{
