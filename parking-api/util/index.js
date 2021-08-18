@@ -13,4 +13,17 @@ const getCurrentTime = () => {
     return `${hours}:${mins}:${secs}`;
 };
 
-module.exports = { getCurrentTime };
+const filterData = (filter,list) => {
+    return list.map( obj => {
+        const newObj = {};
+        for(const prop of filter) {
+            newObj[prop] = obj[prop];
+        }
+        return newObj;
+    });
+};
+
+module.exports = { 
+    getCurrentTime,
+    filterData
+};

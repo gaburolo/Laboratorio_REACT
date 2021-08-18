@@ -1,6 +1,6 @@
 const express = require('express');
 const { config } = require('./config');
-const { getCurrentTime } = require('./util')
+const { getCurrentTime, filterData } = require('./util')
 const cors = require('cors');
 let { spaces } = require('./db');
 
@@ -36,16 +36,11 @@ app.get('/api/spaces',(req,res)=>{
         _spaces = _spaces.filter(s => s.state === 'in-use');
     }
 
+    // Apply filter for object properties
     let filter = req.query.filter;
     if(filter) {
         filter = filter.split(',');
-        _spaces = _spaces.map( s => {
-            const newSpace = {};
-            for(const prop of filter) {
-                newSpace[prop] = s[prop];
-            }
-            return newSpace;
-        });
+        _spaces = filterData(filter,_spaces);
     }
 
     return res.status(200).send(_spaces);
