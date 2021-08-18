@@ -26,13 +26,25 @@ app.all('/', function(req, res, next) {
 
 // Server landing
 app.get('/',(req,res)=>{
-    res.send('Node JS api');
+    return res.send('Node JS api');
 });
 
 
 // [GET] /api/spaces
 app.get('/api/spaces',(req,res)=>{
-    res.status(200).send(spaces);
+    const state = req.query.state;
+    let _spaces = [... spaces];
+
+    console.log('state: ',req);
+
+    // filter by state
+    if(state === 'free') {
+        _spaces = _spaces.filter(s => s.state === 'free');
+    } else if (state === 'in-use') {
+        _spaces = _spaces.filter(s => s.state === 'in-use');
+    }
+
+    return res.status(200).send(_spaces);
 });
 
 
@@ -41,13 +53,12 @@ app.get('/api/spaces/:id',(req,res)=>{
     const id = parseInt(req.params.id);
     const space = spaces.find(c => c.id === id);
     if(!space) {
-        res.status(404).json({
+        return res.status(404).json({
             status: 'failed',
             error: `Space with id: ${id} not found`
         }).end();
-    } else {
-        res.status(200).json(space);
-    }
+    } 
+    return res.status(200).json(space);
 });
 
 
@@ -62,7 +73,7 @@ app.post('/api/spaces', (req,res) => {
         reserved:false,
     }
     spaces.push(newSpace);
-    res.status(201).json(newSpace);
+    return res.status(201).json(newSpace);
 });
 
 
@@ -72,14 +83,14 @@ app.put('/api/spaces/:id',(req,res) => {
     const modifiedSpace = req.body;
     const space = spaces.find(c => c.id === id);
     if(!space) {
-        res.status(404).json({
+        return res.status(404).json({
             status: 'failed',
             error: `Space with id: ${id} not found`
         }).end();
-    } else {
-        space.detail = modifiedSpace.detail;
-        res.status(200).json(space);
     }
+
+    space.detail = modifiedSpace.detail;
+    return res.status(200).json(space);
 });
 
 
@@ -88,21 +99,21 @@ app.delete('/api/spaces/:id',(req,res) => {
     const id = parseInt(req.params.id);
     let space = spaces.find(c => c.id === id);
     if(!space) {
-        res.status(404).json({
+        return res.status(404).json({
             status: 'failed',
             error: `Space with id: ${id} not found`
         }).end();
     }
 
     else if(space.reserved) {
-        res.status(403).json({
+        return res.status(403).json({
             status: 'failed',
             error: `Space cannot be deleted because it is occupied`
         }).end();
-    } else {
-        spaces = spaces.filter( s => s.id !== space.id);
-        res.status(200).json(space).end();
     }
+
+    spaces = spaces.filter( s => s.id !== space.id);
+    return res.status(200).json(space).end();
 });
 
 
@@ -114,31 +125,28 @@ app.get('/api/reservations',(req,res) => {
             inUseSpaces.push(space);
         }
     });
-    res.status(200).send(inUseSpaces);
+    return res.status(200).send(inUseSpaces);
 });
 
 
 // [POST] /api/reservations
 app.post('/api/reservations',(req,res)=>{
     const licensePlate = req.body.licensePlate;
-    let success = false;
+    
     spaces.forEach( space => {
-        if(!space.reserved && !success) {
+        if(!space.reserved) {
             space.state = "in-use";
             space.reserved = true;
             space.licensePlate = licensePlate;
             space.checkIn = getCurrentTime();
-            res.status(201).json(space).end();
-            success = true;
+            return res.status(201).json(space).end();
         }
     });
 
-    if(!success){
-        res.status(202).json({
-            status: 'failed',
-            error: 'The reservation cannot be carried out. All spaces are occupied.'
-        }).end();
-    }
+    return res.status(202).json({
+        status: 'failed',
+        error: 'The reservation cannot be carried out. All spaces are occupied.'
+    }).end();
 });
 
 // [DELETE] /api/reservations/{id}
@@ -147,18 +155,18 @@ app.delete('/api/reservations/:id',(req,res)=>{
     let space = spaces.find(c => c.id === id);
 
     if(!space || !space.reserved) {
-        res.status(404).json({
+        return res.status(404).json({
             status: 'failed',
             error: `Reservation of space with id: ${id} not found`
         }).end();
-    } else {
-        space.state = "free";
-        space.reserved = false;
-        space.licensePlate = '';
-        space.checkIn = '';
-        
-        res.status(200).json(space);
     }
+    
+    space.state = "free";
+    space.reserved = false;
+    space.licensePlate = '';
+    space.checkIn = '';
+        
+    return res.status(200).json(space);
 });
 
 
