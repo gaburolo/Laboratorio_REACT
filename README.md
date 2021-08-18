@@ -31,6 +31,8 @@ Check the use of the commands\
 I have developed this project on my way to becoming an Python professional.
 
 * **Esteban Alvarado** - *Software Developer* - [@estalvgs1999](https://github.com/estalvgs1999)
+* **Olman Castro** - *Software Developer* - [@estalvgs1999](https://github.com/gaburolo)
+* **Martín Calderón** - *Software Developer* - [@estalvgs1999](https://github.com/oldboy379)
 
 This project has been developed as part of Platzi's **CRUD with python** course. The thanks for this project go to [Platzi](https://platzi.com/clases/python-practico/)!
 
