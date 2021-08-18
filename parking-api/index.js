@@ -1,14 +1,16 @@
-const express = require('express');
-const https = require('https');
-const { config } = require('./config');
-const { getCurrentTime, filterData } = require('./util')
-const cors = require('cors');
-let { spaces } = require('./db');
+const express = require('express')
+const https = require('https')
+const cors = require('cors')
 
-const app=express();
+const { config } = require('./config')
+const { getCurrentTime, filterData } = require('./util')
+let { spaces } = require('./db')
+
+const app = express();
 app.use(express.json());
 app.use(cors());
 
+const sslServer = https.createServer(config.ssl, app);
 
 // Add headers before the routes are defined
 app.all('/', function(req, res, next) {
@@ -119,12 +121,20 @@ app.delete('/api/spaces/:id',(req,res) => {
 
 // [GET] /api/reservations
 app.get('/api/reservations',(req,res) => {
-    const inUseSpaces = [];
+    let inUseSpaces = [];
     spaces.forEach( space => {
         if(space.reserved) {
             inUseSpaces.push(space);
         }
     });
+
+    // Apply filter for object properties
+    let filter = req.query.filter;
+    if(filter) {
+        filter = filter.split(',');
+        inUseSpaces = filterData(filter,inUseSpaces);
+    }
+
     return res.status(200).send(inUseSpaces);
 });
 
@@ -170,8 +180,6 @@ app.delete('/api/reservations/:id',(req,res)=>{
     return res.status(200).json(space);
 });
 
-const sslServer = https.createServer(config.ssl, app);
-const httpPort = config.httpPort;
-const httpsPort = config.httpsPort;
-app.listen(httpPort,() => console.log(`Server running 🚀 on port: ${httpPort}... `));
-sslServer.listen(httpsPort,() => console.log(`Secure server 🚀🔑 on port: ${httpsPort}... `));
+
+app.listen(config.httpPort,() => console.log(`Server running 🚀 on port: ${config.httpPort}... `));
+sslServer.listen(config.httpsPort,() => console.log(`Secure server 🚀🔑 on port: ${config.httpsPort}... `));
