@@ -20,10 +20,16 @@ const options = {
             title: 'Parking API',
             version: '1.0.0',
             description: 'Customer Parking API',
+            contact: {
+                name: 'Martin Calderón',
+                email: 'martinrolo22tec@gmail.com',
+                url: 'https://github.com/gaburolo/Laboratorio_REACT'
+            }
         },
         servers: [
             {
                 'url': 'http://localhost:8000',
+                'description': 'Local server development'
             }
         ],
     },
