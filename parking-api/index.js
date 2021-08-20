@@ -10,6 +10,29 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+const swaggerJsDoc = require('swagger-jsdoc')
+const swaggerUI = require('swagger-ui-express')
+
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Parking API',
+            version: '1.0.0',
+            description: 'Customer Parking API',
+        },
+        servers: [
+            {
+                'url': 'http://localhost:8000',
+            }
+        ],
+    },
+    apis: ['./index.js']
+};
+
+const specs = swaggerJsDoc(options);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs));
+
 const sslServer = https.createServer(config.ssl, app);
 
 // Add headers before the routes are defined
@@ -20,14 +43,114 @@ app.all('/', function(req, res, next) {
     next()
 });
 
+//Routes
+
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *      Spaces:
+ *          type: object
+ *          required:
+ *              - detail
+ *          properties:
+ *              id:
+ *                  type: number
+ *                  description: The auto-generated id of the space
+ *              state:
+ *                  type: string
+ *                  description: The state of the space
+ *              detail:
+ *                  type: string
+ *                  description: The parking information
+ *              licensePlate:
+ *                  type: string
+ *                  description: The license plate of the car 
+ *              checkIn:
+ *                  type: string
+ *                  description: The check-in time
+ *              reserved:
+ *                  type: boolean
+ *                  description: Is the parking reservation?
+ *          example:
+ *              id: 10
+ *              state: in-use
+ *              detail: indoor-parking
+ *              licensePlate: 8652855
+ *              checkIn: 14:57
+ *              reserved: true
+ *      PPDSpaces:
+ *          type: object
+ *          required:
+ *              - detail
+ *          properties:
+ *              detail:
+ *                  type: string
+ *                  description: The parking information
+ *          example:
+ *              detail: indoor-parking
+ *      PPDReservetion:
+ *          type: object
+ *          required:
+ *              - licensePlate
+ *          properties:
+ *              licensePlate:
+ *                  type: string
+ *                  description: The license plate of the car
+ *          example:
+ *              licensePlate: 56225856
+ *      Error:
+ *          type: object
+ *          properties:
+ *              menssage:
+ *                  type: string
+ *                  description: Error message
+ *                  example: Not found
+ *              internal_code:
+ *                  type: string
+ *                  description: Error internal code
+ *                  example: Invalid parameters
+ */
+
+/**
+ * @swagger
+ * tags: 
+ *     - name: Spaces
+ *       description: The Parking Spaces managing
+ *     - name: Reservation
+ *       description: The Parking Reservation managing
+ */
+
 
 // Server landing
 app.get('/',(req,res)=>{
     return res.send('Node JS api');
 });
 
+/**
+ * @swagger
+ * /api/spaces:
+ *  get:
+ *      summary: Return list of all spaces
+ *      tags: [Spaces]
+ *      responses:
+ *          200:
+ *              description: The list of the spaces
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#/components/schemas/Spaces'
+ *          404:
+ *              description: The request not found
+ *              content:
+ *                  applocation/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
+ */
 
-// [GET] /api/spaces
+// [GET] /api/spaces/
 app.get('/api/spaces',(req,res)=>{
     const state = req.query.state;
     let _spaces = [...spaces];
@@ -54,6 +177,36 @@ app.get('/api/spaces',(req,res)=>{
 });
 
 
+/**
+ * @swagger
+ * /api/spaces/{id}:
+ *  get:
+ *      summary: Get the space by id
+ *      tags: [Spaces]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *               type: number
+ *            required: true
+ *            description: The space id
+ *      responses:
+ *          200:
+ *              description: The space description by id
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#/components/schemas/Spaces'
+ *          404:
+ *              description: The request not found
+ *              content:
+ *                  applocation/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
+ */
+
 // [GET] /api/spaces/{id}
 app.get('/api/spaces/:id',(req,res)=>{
     const id = parseInt(req.params.id);
@@ -68,7 +221,33 @@ app.get('/api/spaces/:id',(req,res)=>{
 });
 
 
-// [POST] /api/spaces
+/**
+ * @swagger
+ * /api/spaces:
+ *  post:
+ *      summary: Create a new Space
+ *      tags: [Spaces]
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/components/schemas/PPDSpaces'
+ *      responses:
+ *          201:
+ *              description: The space was duccessfully created
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                              $ref: '#/components/schemas/Spaces'
+ *          404:
+ *              description: The request not found
+ *              content:
+ *                  applocation/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
+ */
+
 app.post('/api/spaces', (req,res) => {
     const newSpace = {
         id:spaces[spaces.length-1].id+1,
@@ -82,6 +261,39 @@ app.post('/api/spaces', (req,res) => {
     return res.status(201).json(newSpace);
 });
 
+/**
+ * @swagger
+ * /api/spaces/{id}:
+ *  put:
+ *      summary: Update the space by the id
+ *      tags: [Spaces]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: number
+ *            required: true
+ *            description: The space id
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/components/schemas/PPDSpaces'
+ *      responses:
+ *          200: 
+ *              description: The space was duccessfully created
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                              $ref: '#/components/schemas/Spaces'
+ *          404:
+ *              description: The request not found
+ *              content:
+ *                  applocation/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
+ */
 
 // [PUT] /api/spaces/{id}
 app.put('/api/spaces/:id',(req,res) => {
@@ -99,6 +311,27 @@ app.put('/api/spaces/:id',(req,res) => {
     return res.status(200).json(space);
 });
 
+/**
+ * @swagger
+ * /api/spaces/{id}:
+ *  delete:
+ *      summary: Remove the space by the id
+ *      tags: [Spaces]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: number
+ *            required: true
+ *            description: The space id
+ *      responses:
+ *          200: 
+ *              description: The space deleted
+ *          404:
+ *              description: The space not found
+ *          403:
+ *              description: The space cannot be deleted because it is occupied
+ */
 
 // [DELETE] /api/spaces/{id}
 app.delete('/api/spaces/:id',(req,res) => {
@@ -122,6 +355,28 @@ app.delete('/api/spaces/:id',(req,res) => {
     return res.status(200).json(space).end();
 });
 
+/**
+ * @swagger
+ * /api/reservations:
+ *  get:
+ *      summary: Return list of all spaces is true
+ *      tags: [Reservation]
+ *      responses:
+ *          200:
+ *              description: The list of the spaces with reservation
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#/components/schemas/Spaces'
+ *          404:
+ *              description: The request not found
+ *              content:
+ *                  applocation/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
+ */
 
 // [GET] /api/reservations
 app.get('/api/reservations',(req,res) => {
@@ -145,6 +400,32 @@ app.get('/api/reservations',(req,res) => {
     return res.status(200).send(inUseSpaces);
 });
 
+/**
+ * @swagger
+ * /api/reservations:
+ *  post:
+ *      summary: Create a new Reservation
+ *      tags: [Reservation]
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/components/schemas/PPDReservetion'
+ *      responses:
+ *          201:
+ *              description: The reservation was duccessfully created
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                              $ref: '#/components/schemas/Spaces'
+ *          202:
+ *              description: The request not found
+ *              content:
+ *                  applocation/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
+ */
 
 // [POST] /api/reservations
 app.post('/api/reservations',(req,res)=>{
@@ -166,6 +447,25 @@ app.post('/api/reservations',(req,res)=>{
     });
 });
 
+/**
+ * @swagger
+ * /api/reservations/{id}:
+ *  delete:
+ *      summary: Remove the space by the id
+ *      tags: [Reservation]
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: number
+ *            required: true
+ *            description: The space id
+ *      responses:
+ *          200: 
+ *              description: The reservation was deleted
+ *          404:
+ *              description: The reservation of space not found
+ */
 
 // [DELETE] /api/reservations/{id}
 app.delete('/api/reservations/:id',(req,res)=>{
